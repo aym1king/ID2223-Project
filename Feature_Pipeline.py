@@ -1,5 +1,6 @@
 import os
 import modal
+from settings import *
 
 LOCAL=False
 
@@ -7,7 +8,7 @@ if LOCAL == False:
    stub = modal.Stub("weather_daily")
    image = modal.Image.debian_slim().pip_install(["hopsworks"]) 
 
-   @stub.function(image=image, schedule=modal.Period(days=1), secret=modal.Secret.from_name("erland-hopsworks-ai"))
+   @stub.function(image=image, schedule=modal.Period(days=1), secret=modal.Secret.from_name("id2223-project-group"))
    def f():
        g()
 
@@ -82,7 +83,7 @@ def get_electricity_demand_and_weather():
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
     url = "https://archive-api.open-meteo.com/v1/archive"
-    # take weather for urban cities with largest population in England (London, Birmingham, Manchester) and Wales (Cardiff, Swansea)
+    # Receive weather for urban cities with the largest populations in England (London, Birmingham, Manchester) and Wales (Cardiff, Swansea)
     params = {
     	"latitude": [51.5085, 52.4814, 53.4809, 51.48, 51.6208],
     	"longitude": [-0.1257, -1.8998, -2.2374, -3.18, -3.9432],
@@ -132,22 +133,11 @@ def get_electricity_demand_and_weather():
 
     return combined_df
 
-
-def get_random_weather():
-    """
-    Returns a DataFrame
-    """
-    import pandas as pd
-    import random
-
-    return weather_df
-
-
 def g():
     import hopsworks
     import pandas as pd
 
-    project = hopsworks.login()
+    project = hopsworks.login(project=SETTINGS["FS_PROJECT_NAME"], api_key_value=SETTINGS["FS_API_KEY"])
     fs = project.get_feature_store()
 
     weather_df = get_electricity_demand_and_weather()
