@@ -130,7 +130,7 @@ def get_electricity_demand_and_weather():
     
     combined_df = pd.concat([demand_df, weather_df], axis=1)
     combined_df.index.rename("settlement_date", inplace=True)
-
+    combined_df.reset_index(inplace=True)
     return combined_df
 
 def g():
