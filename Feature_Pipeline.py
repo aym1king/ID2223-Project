@@ -5,11 +5,11 @@ from settings import *
 LOCAL=False
 
 if LOCAL == False:
-   stub = modal.Stub("weather_daily")
-   image = modal.Image.debian_slim().pip_install(["hopsworks"]) 
-
-   @stub.function(image=image, schedule=modal.Period(days=1), secret=modal.Secret.from_name("id2223-project-group"))
-   def f():
+    stub = modal.Stub("weather_daily")
+    image = modal.Image.debian_slim().pip_install(["hopsworks"]) 
+    
+    @stub.function(image=image, schedule=modal.Period(days=1), secret=modal.Secret.from_name("id2223-project-group"))
+    def f():
        g()
 
 
@@ -18,9 +18,9 @@ def get_electricity_demand_and_weather():
     Returns electricity demand and weather DataFrame during the past 30 days starting from the day before yesterday
     """
     import requests
-
+    
     url = "https://api.nationalgrideso.com/dataset/7a12172a-939c-404c-b581-a6128b74f588/resource/177f6fa4-ae49-4182-81ea- 0c6b35f26ca6/download/demanddataupdate.csv"
-
+    
     # Request latest electricity demand data
     response = requests.get(url)
     
@@ -62,71 +62,73 @@ def get_electricity_demand_and_weather():
     df3.index = pd.to_datetime(df3.index)
     
     from datetime import date, timedelta
-    past_30_days = []
-    for i in range(2, 30):
-      past_30_days.append((datetime.datetime.now() - timedelta(i)).strftime('%Y-%m-%d'))
+    today = datetime.datetime.now()
+    past_demand_days = [(today - timedelta(2)).strftime('%Y-%m-%d'), (today - timedelta(3)).strftime('%Y-%m-%d'), 
+                        (today - timedelta(7)).strftime('%Y-%m-%d'), (today - timedelta(30)).strftime('%Y-%m-%d')]
     
-    df3 = df3.loc[past_30_days]
+    df3 = df3.loc[past_demand_days]
     
     demand_df = df3 = df3.iloc[::-1]
     
-    import openmeteo_requests
-    import requests_cache
-    import pandas as pd
-    from retry_requests import retry
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
     
     # Setup the Open-Meteo API client with cache and retry on error
-    cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
+    cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
     
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
-    url = "https://archive-api.open-meteo.com/v1/archive"
+    url = "https://api.open-meteo.com/v1/forecast"
     # Receive weather for urban cities with the largest populations in England (London, Birmingham, Manchester) and Wales (Cardiff, Swansea)
     params = {
-    	"latitude": [51.5085, 52.4814, 53.4809, 51.48, 51.6208],
-    	"longitude": [-0.1257, -1.8998, -2.2374, -3.18, -3.9432],
-    	"start_date": past_30_days[-1],
-    	"end_date": past_30_days[0],
-    	"daily": ["temperature_2m_mean", "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max"]
+        "latitude": [51.5085, 52.4814, 53.4809, 51.48, 51.6208],
+        "longitude": [-0.1257, -1.8998, -2.2374, -3.18, -3.9432],
+        "start_date": today,
+    	"end_date": today,
+    	"daily": ["temperature_2m_max", "temperature_2m_min", "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max"]
     }
     responses = openmeteo.weather_api(url, params=params)
     
     # Process first location. Add a for-loop for multiple locations or weather models
     weather_dfs = {}
+    
     for i, response in enumerate(responses):
-      print(f"Coordinates {response.Latitude()}°E {response.Longitude()}°N")
-      print(f"Elevation {response.Elevation()} m asl")
-      print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-      print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
-    
-      # Process daily data. The order of variables needs to be the same as requested.
-      daily = response.Daily()
-      daily_temperature_2m_mean = daily.Variables(0).ValuesAsNumpy()
-      daily_sunshine_duration = daily.Variables(1).ValuesAsNumpy()
-      daily_precipitation_sum = daily.Variables(2).ValuesAsNumpy()
-      daily_precipitation_hours = daily.Variables(3).ValuesAsNumpy()
-      daily_wind_speed_10m_max = daily.Variables(4).ValuesAsNumpy()
-    
-      daily_data = {"date": pd.date_range(
-        start = pd.to_datetime(daily.Time(), unit = "s"),
-        end = pd.to_datetime(daily.TimeEnd(), unit = "s"),
-        freq = pd.Timedelta(seconds = daily.Interval()),
-        inclusive = "left"
-      )}
-      daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
-      daily_data["sunshine_duration"] = daily_sunshine_duration
-      daily_data["precipitation_sum"] = daily_precipitation_sum
-      daily_data["precipitation_hours"] = daily_precipitation_hours
-      daily_data["wind_speed_10m_max"] = daily_wind_speed_10m_max
-    
-      weather_dfs[i] = pd.DataFrame(data = daily_data)
+        print(f"Coordinates {response.Latitude()}°E {response.Longitude()}°N")
+        print(f"Elevation {response.Elevation()} m asl")
+        print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
+        print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+        
+        # Process daily data. The order of variables needs to be the same as requested.
+        daily = response.Daily()
+        daily_temperature_2m_max = daily.Variables(0).ValuesAsNumpy()
+        daily_temperature_2m_min = daily.Variables(1).ValuesAsNumpy()
+        daily_sunshine_duration = daily.Variables(2).ValuesAsNumpy()
+        daily_precipitation_sum = daily.Variables(3).ValuesAsNumpy()
+        daily_precipitation_hours = daily.Variables(4).ValuesAsNumpy()
+        daily_wind_speed_10m_max = daily.Variables(5).ValuesAsNumpy()
+        
+        daily_data = {"date": pd.date_range(
+        	start = pd.to_datetime(daily.Time(), unit = "s"),
+        	end = pd.to_datetime(daily.TimeEnd(), unit = "s"),
+        	freq = pd.Timedelta(seconds = daily.Interval()),
+        	inclusive = "left"
+        )}
+        daily_data["temperature_2m_max"] = daily_temperature_2m_max
+        daily_data["temperature_2m_min"] = daily_temperature_2m_min
+        daily_data["sunshine_duration"] = daily_sunshine_duration
+        daily_data["precipitation_sum"] = daily_precipitation_sum
+        daily_data["precipitation_hours"] = daily_precipitation_hours
+        daily_data["wind_speed_10m_max"] = daily_wind_speed_10m_max
+        
+        weather_dfs[i] = pd.DataFrame(data = daily_data)
     
     for key, weather_df in weather_dfs.items():
       weather_dfs[key] = weather_df.set_index('date')
     
     weather_df = pd.concat(weather_dfs.values()).groupby(level=0).mean()
+    weather_df['temperature_2m_mean'] = (weather_df['temperature_2m_max'] + weather_df['temperature_2m_min']) / 2
+    weather_df = weather_df[['temperature_2m_mean', 'sunshine_duration',	'precipitation_sum',	'precipitation_hours',	'wind_speed_10m_max']] 
     
     combined_df = pd.concat([demand_df, weather_df], axis=1)
     combined_df.index.rename("settlement_date", inplace=True)
