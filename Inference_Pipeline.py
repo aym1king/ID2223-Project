@@ -24,7 +24,7 @@ def add_date_features(df):
 batch_data = add_date_features(batch_data)
 batch_data.set_index(['settlement_date'], inplace=True)
 
-# Doesn't work since model hasn't been updated to model registry yet
+# Doesn't work since model hasn't been uploaded to model registry yet
 mr = project.get_model_registry()
 model = mr.get_model("electricity_demand_model", version=1)
 model_dir = model.download()
