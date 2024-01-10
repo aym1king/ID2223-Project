@@ -63,14 +63,17 @@ def get_electricity_demand_and_weather():
     
     from datetime import date, timedelta
     today = datetime.datetime.now()
-    past_demand_days = [(today - timedelta(2)).strftime('%Y-%m-%d'), (today - timedelta(3)).strftime('%Y-%m-%d'), 
-                        (today - timedelta(7)).strftime('%Y-%m-%d'), (today - timedelta(30)).strftime('%Y-%m-%d')]
+    past_demand_days = [(today - timedelta(7)).strftime('%Y-%m-%d'), (today - timedelta(14)).strftime('%Y-%m-%d'), 
+                        (today - timedelta(21)).strftime('%Y-%m-%d'), (today - timedelta(28)).strftime('%Y-%m-%d')]
     
     df3 = df3.loc[past_demand_days]
+    df3.reset_index()
     
-    demand_df = df3 = df3.iloc[::-1]
-    
-    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    lag_df = pd.DataFrame(data=[df3['england_wales_demand'].to_list()], columns=['england_wales_demand_lag7',
+                                                                              'england_wales_demand_lag14',
+                                                                              'england_wales_demand_lag21',
+                                                                              'england_wales_demand_lag28'])
+    lag_df['settlement_date'] = [pd.to_datetime(today.strftime('%Y-%m-%d'))]
     
     # Setup the Open-Meteo API client with cache and retry on error
     cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
@@ -84,8 +87,8 @@ def get_electricity_demand_and_weather():
     params = {
         "latitude": [51.5085, 52.4814, 53.4809, 51.48, 51.6208],
         "longitude": [-0.1257, -1.8998, -2.2374, -3.18, -3.9432],
-        "start_date": today,
-    	"end_date": today,
+        "start_date": today.strftime('%Y-%m-%d'),
+    	"end_date": today.strftime('%Y-%m-%d'),
     	"daily": ["temperature_2m_max", "temperature_2m_min", "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max"]
     }
     responses = openmeteo.weather_api(url, params=params)
@@ -124,16 +127,12 @@ def get_electricity_demand_and_weather():
         weather_dfs[i] = pd.DataFrame(data = daily_data)
     
     for key, weather_df in weather_dfs.items():
-      weather_dfs[key] = weather_df.set_index('date')
-    
+        weather_dfs[key] = weather_df.rename(columns={"date": "settlement_date"})
+        
     weather_df = pd.concat(weather_dfs.values()).groupby(level=0).mean()
     weather_df['temperature_2m_mean'] = (weather_df['temperature_2m_max'] + weather_df['temperature_2m_min']) / 2
-    weather_df = weather_df[['temperature_2m_mean', 'sunshine_duration',	'precipitation_sum',	'precipitation_hours',	'wind_speed_10m_max']] 
-    
-    combined_df = pd.concat([demand_df, weather_df], axis=1)
-    combined_df.index.rename("settlement_date", inplace=True)
-    combined_df.reset_index(inplace=True)
-    return combined_df
+    weather_df = weather_df[['settlement_date', 'temperature_2m_mean', 'sunshine_duration',	'precipitation_sum',	'precipitation_hours',	'wind_speed_10m_max']] 
+    return lag_df, weather_df
 
 def g():
     import hopsworks
@@ -142,10 +141,12 @@ def g():
     project = hopsworks.login(project=SETTINGS["FS_PROJECT_NAME"], api_key_value=SETTINGS["FS_API_KEY"])
     fs = project.get_feature_store()
 
-    weather_df = get_electricity_demand_and_weather()
-
-    weather_fg = fs.get_feature_group(name="weather",version=1)
+    lag_df, weather_df = get_electricity_demand_and_weather()
+    
+    weather_fg = fs.get_feature_group(name="weather", version=1)
+    lag_fg = fs.get_feature_group(name="lagged_demand", version=1)
     weather_fg.insert(weather_df)
+    lag_fg.insert(lag_df)
 
 if __name__ == "__main__":
     if LOCAL == True :
