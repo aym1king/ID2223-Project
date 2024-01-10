@@ -62,6 +62,8 @@ def get_electricity_demand_and_weather():
     df3.index = pd.to_datetime(df3.index)
     
     from datetime import date, timedelta
+    import datetime
+    
     today = datetime.datetime.now()
     past_demand_days = [(today - timedelta(7)).strftime('%Y-%m-%d'), (today - timedelta(14)).strftime('%Y-%m-%d'), 
                         (today - timedelta(21)).strftime('%Y-%m-%d'), (today - timedelta(28)).strftime('%Y-%m-%d')]
@@ -76,6 +78,9 @@ def get_electricity_demand_and_weather():
     lag_df['settlement_date'] = [pd.to_datetime(today.strftime('%Y-%m-%d'))]
     
     # Setup the Open-Meteo API client with cache and retry on error
+    import openmeteo_requests
+    import requests_cache
+    from retry_requests import retry
     cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
