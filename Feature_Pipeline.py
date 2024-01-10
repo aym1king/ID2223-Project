@@ -137,6 +137,10 @@ def get_electricity_demand_and_weather():
     weather_df = pd.concat(weather_dfs.values()).groupby(level=0).mean()
     weather_df['temperature_2m_mean'] = (weather_df['temperature_2m_max'] + weather_df['temperature_2m_min']) / 2
     weather_df = weather_df[['settlement_date', 'temperature_2m_mean', 'sunshine_duration',	'precipitation_sum',	'precipitation_hours',	'wind_speed_10m_max']] 
+    
+    import numpy as np
+    weather_df['england_wales_demand'] = numpy.nan
+    
     return lag_df, weather_df
 
 def g():
