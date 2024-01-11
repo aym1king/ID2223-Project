@@ -19,7 +19,7 @@ def get_electricity_demand_and_weather():
     """
     import requests
     
-    url = "https://api.nationalgrideso.com/dataset/7a12172a-939c-404c-b581-a6128b74f588/resource/177f6fa4-ae49-4182-81ea- 0c6b35f26ca6/download/demanddataupdate.csv"
+    url = "https://api.nationalgrideso.com/dataset/7a12172a-939c-404c-b581-a6128b74f588/resource/177f6fa4-ae49-4182-81ea-0c6b35f26ca6/download/demanddataupdate.csv"
     
     # Request latest electricity demand data
     response = requests.get(url)
