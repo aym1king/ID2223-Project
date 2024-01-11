@@ -1,4 +1,5 @@
 import hopsworks
+import joblib
 from settings import *
 project = hopsworks.login(project=SETTINGS["FS_PROJECT_NAME"], api_key_value=SETTINGS["FS_API_KEY"])
 fs = project.get_feature_store()
