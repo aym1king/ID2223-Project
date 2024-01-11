@@ -2,7 +2,7 @@ import os
 import modal
 from settings import *
 
-LOCAL=False
+LOCAL=True
 
 if LOCAL == False:
     stub = modal.Stub("weather_daily")
