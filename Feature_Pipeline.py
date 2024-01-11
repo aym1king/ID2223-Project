@@ -139,7 +139,7 @@ def get_electricity_demand_and_weather():
     weather_df = weather_df[['settlement_date', 'temperature_2m_mean', 'sunshine_duration',	'precipitation_sum',	'precipitation_hours',	'wind_speed_10m_max']] 
     
     import numpy as np
-    weather_df['england_wales_demand'] = numpy.nan
+    weather_df['england_wales_demand'] = np.nan
     
     return lag_df, weather_df
 
