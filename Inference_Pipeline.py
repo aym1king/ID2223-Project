@@ -26,9 +26,9 @@ batch_data.set_index(['settlement_date'], inplace=True)
 
 # Doesn't work since model hasn't been uploaded to model registry yet (see Training.ipynb)
 mr = project.get_model_registry()
-model = mr.get_model("electricity_demand_model", version=1)
+model = mr.get_model("demand_model", version=1)
 model_dir = model.download()
-model = joblib.load(model_dir + "/electricity_demand_model.pkl")
+model = joblib.load(model_dir + "/demand_model.pkl")
 
 y_pred = model.predict(batch_data)
 # TODO: Do something with this
