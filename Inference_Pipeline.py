@@ -70,10 +70,13 @@ print("aepic", monitor_df.head())
 history_df['settlement_date'] = history_df['settlement_date'].dt.tz_localize(None)
 
 # Convert settlement_date to date only
-history_df['settlement_date'] = history_df['settlement_date'].dt.date
+history_df['settlement_date'] = pd.to_datetime(history_df['settlement_date']).dt.date
 
 # Concatenate history_df and monitor_df
 history_df = pd.concat([history_df, monitor_df])
+
+# Convert settlement_date back to Timestamp objects
+history_df['settlement_date'] = pd.to_datetime(history_df['settlement_date'])
 
 # Sort DataFrame by settlement_date
 history_df.sort_values(by='settlement_date', inplace=True)
