@@ -12,10 +12,11 @@ from datetime import date, timedelta
 today = datetime.datetime.now()
 yesterday = (today - timedelta(1)).strftime('%Y-%m-%d')
 yesterday_2 = (today - timedelta(2)).strftime('%Y-%m-%d')
+yesterday_3 = (today - timedelta(3)).strftime('%Y-%m-%d')
 today = today.strftime('%Y-%m-%d')
 
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
-batch_data = feature_view.get_batch_data(start_time=yesterday_2, end_time=yesterday)
+batch_data = feature_view.get_batch_data()#start_time=yesterday_3, end_time=yesterday)
 print("this is batch:", batch_data)
 
 def add_date_features(df):
@@ -41,7 +42,7 @@ y_pred = model.predict(batch_data)
 # TODO: Do something with this
 
 monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
-                                            version=1,
+                                            version=2,
                                             primary_key=["prediction"],
                                             event_time="settlement_date",
                                             description="Electricity Demand Forecasting Monitoring"
@@ -49,19 +50,19 @@ monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
 
 demand = y_pred
 print("this is y_pred", y_pred)
-dates = pd.Timestamp(yesterday)
+dates = [pd.Timestamp(yesterday_3), pd.Timestamp(yesterday_2), pd.Timestamp(yesterday)]
 print("this is dates", dates)
 
 data = {
-    'prediction': [demand],
-    'settlement_date': [dates]
+    'prediction': demand,
+    'settlement_date': dates
    }
 
 monitor_df = pd.DataFrame(data)
 monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64[ns]")
 monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
-history_df = monitor_fg.read(yesterday)
+history_df = monitor_fg.read()
 # Add our prediction to the history, as the history_df won't have it - 
 # the insertion was done asynchronously, so it will take ~1 min to land on App
 history_df = pd.concat([history_df, monitor_df])
