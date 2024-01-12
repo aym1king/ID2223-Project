@@ -14,7 +14,7 @@ yesterday = (today - timedelta(1)).strftime('%Y-%m-%d')
 today = today.strftime('%Y-%m-%d')
 
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
-batch_data = feature_view.get_batch_data(start_time=yesterday, end_time=today, read_options={"use_hive": True})
+batch_data = feature_view.get_batch_data(start_time=yesterday, end_time=today)
 print("this is batch:", batch_data)
 
 def add_date_features(df):
@@ -60,7 +60,7 @@ monitor_df = pd.DataFrame(data)
 monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64[ns]")
 monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
-history_df = monitor_fg.read(read_options={"use_hive": True})
+history_df = monitor_fg.read(yesterday)
 # Add our prediction to the history, as the history_df won't have it - 
 # the insertion was done asynchronously, so it will take ~1 min to land on App
 history_df = pd.concat([history_df, monitor_df])
