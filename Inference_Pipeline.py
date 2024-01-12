@@ -10,12 +10,16 @@ fs = project.get_feature_store()
 import datetime
 from datetime import date, timedelta
 today = datetime.datetime.now()
-yesterday = (today - timedelta(1)).strftime('%Y-%m-%d')
-two_days_ago = (today - timedelta(2)).strftime('%Y-%m-%d')
+n = 3
+all_dates = []
+for day in range(n, 0, -1):
+    date_n_days_ago = (today - timedelta(n)).strftime('%Y-%m-%d')
+    all_dates.append(date_n_days_ago)
 today = today.strftime('%Y-%m-%d')
+all_dates.append(today)
 
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
-batch_data = feature_view.get_batch_data(start_time=two_days_ago, end_time=yesterday)
+batch_data = feature_view.get_batch_data(start_time=all_dates[0], end_time=all_dates[-1])
 
 def add_date_features(df):
     new_df = df.copy()
@@ -49,7 +53,8 @@ demand = y_pred[-1]
 
 data = {
     'prediction': [demand],
-    'settlement_date': [today],
+    'settlement_date': [pd.Timestamp(dt_str) for dt_str in all_dates]
+],
    }
 
 monitor_df = pd.DataFrame(data)
