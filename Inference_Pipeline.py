@@ -19,7 +19,7 @@ today = today.strftime('%Y-%m-%d')
 all_dates.append(today)
 
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
-batch_data = feature_view.get_batch_data(start_time=all_dates[0], end_time=all_dates[-1])
+batch_data = feature_view.get_batch_data(start_time=all_dates[0], end_time=all_dates[-2])
 
 def add_date_features(df):
     new_df = df.copy()
