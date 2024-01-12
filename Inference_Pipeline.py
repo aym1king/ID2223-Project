@@ -57,7 +57,7 @@ data = {
    }
 
 monitor_df = pd.DataFrame(data)
-monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64[ns]")
+monitor_df['settlement_date'] = monitor_df['settlement_date'].tz_convert(None).astype("datetime64[ns]")
 monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
 history_df = monitor_fg.read()
