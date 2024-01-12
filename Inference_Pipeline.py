@@ -40,7 +40,7 @@ y_pred = model.predict(batch_data)
 # TODO: Do something with this
 
 monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
-                                            version=2,
+                                            version=1,
                                             primary_key=["prediction"],
                                             event_time="settlement_date",
                                             description="Electricity Demand Forecasting Monitoring"
@@ -48,7 +48,7 @@ monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
 
 demand = y_pred
 print("this is y_pred", y_pred)
-dates = [pd.Timestamp(yesterday)]
+dates = [pd.Timestamp(today)]
 print("this is dates", dates)
 
 data = {
@@ -78,8 +78,10 @@ history_plot = history_df.rename(columns={'predictions': 'predicted_england_wale
 
 fig, ax = plt.subplots(figsize=(15, 5))
 history_plot.plot(
-    style=".", ax=ax, title="England Wales Demand", label="one-step forecast"
+    style=".", ax=ax, title="Daily One-Step Forecast Plot for England/Wales Demand"
 )
+plt.ylabel('Electricity Demand (MW)')
+plt.xlabel('Date')
 plt.legend()
 plt.savefig("./historical_forecasts.png")
 dataset_api = project.get_dataset_api()    
