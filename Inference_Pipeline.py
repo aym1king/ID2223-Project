@@ -54,7 +54,6 @@ demand = y_pred[-1]
 data = {
     'prediction': [demand],
     'settlement_date': [pd.Timestamp(dt_str) for dt_str in all_dates]
-],
    }
 
 monitor_df = pd.DataFrame(data)
