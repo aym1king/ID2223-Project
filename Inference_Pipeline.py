@@ -61,17 +61,17 @@ monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64
 monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
 history_df = monitor_fg.read()
-print(history_df.head())
+print("wjaiosioaj", history_df.head())
+print("aepic", monitor_df.head())
 # Add our prediction to the history, as the history_df won't have it - 
 # the insertion was done asynchronously, so it will take ~1 min to land on App
-history_df = pd.concat([history_df, monitor_df])
-history_df.reset_index(inplace=True)
-history_df = history_df[['prediction', 'settlement_date']]
 history_df.set_index('settlement_date')
-history_df.index = history_df.index.astype("datetime64[ns]")
 history_df = history_df.tz_localize(None)
+history_df.index = history_df.index.astype("datetime64[ns]")
+history_df = pd.concat([history_df, monitor_df])
 history_df.sort_index(inplace=True)
 history_df.reset_index(inplace=True)
+history_df = history_df[['prediction', 'settlement_date']]
 
 print(type(history_df))
 print(history_df.dtypes)
