@@ -46,6 +46,7 @@ y_pred = model.predict(batch_data)
 
 monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
                                             version=1,
+                                            primary_key=["prediction"],
                                             event_time="settlement_date",
                                             description="Electricity Demand Forecasting Monitoring"
                                             )
