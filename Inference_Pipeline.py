@@ -56,8 +56,8 @@ dates = [pd.Timestamp(dt_str) for dt_str in all_dates[:-1]]
 print("this is dates", dates)
 
 data = {
-    'prediction': [demand],
-    'settlement_date': [dates]
+    'prediction': demand,
+    'settlement_date': dates
    }
 
 monitor_df = pd.DataFrame(data)
