@@ -1,5 +1,10 @@
 import hopsworks
 import joblib
+from PIL import Image
+import dataframe_image as dfi
+import matplotlib.pyplot as plt
+import pandas as pd
+import requests
 from settings import *
 project = hopsworks.login(project=SETTINGS["FS_PROJECT_NAME"], api_key_value=SETTINGS["FS_API_KEY"])
 fs = project.get_feature_store()
@@ -8,6 +13,7 @@ import datetime
 from datetime import date, timedelta
 today = datetime.datetime.now()
 yesterday = (today - timedelta(1)).strftime('%Y-%m-%d')
+two_days_ago = (today - timedelta(2)).strftime('%Y-%m-%d')
 today = today.strftime('%Y-%m-%d')
 
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
@@ -24,6 +30,7 @@ def add_date_features(df):
 
 batch_data = add_date_features(batch_data)
 batch_data.set_index(['settlement_date'], inplace=True)
+batch_data.sort_index(inplace=True)
 
 # Doesn't work since model hasn't been uploaded to model registry yet (see Training.ipynb)
 mr = project.get_model_registry()
@@ -33,3 +40,37 @@ model = joblib.load(model_dir + "/demand_model.pkl")
 
 y_pred = model.predict(batch_data)
 # TODO: Do something with this
+
+monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
+                                            version=1,
+                                            event_time=["settlement_date"],
+                                            description="Electricity Demand Forecasting Monitoring"
+                                            )
+
+demand = y_pred[-1]
+
+data = {
+    'prediction': [demand],
+    'settlement_date': [today],
+   }
+
+monitor_df = pd.DataFrame(data)
+monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
+
+history_df = monitor_fg.read()
+# Add our prediction to the history, as the history_df won't have it - 
+# the insertion was done asynchronously, so it will take ~1 min to land on App
+history_df = pd.concat([history_df, monitor_df])
+history_df.set_index('settlement_date')
+history_df.sort_index(inplace=True)
+
+history_plot = history_df.set_axis(['england_wales_demand'], axis=1)
+
+fig, ax = plt.subplots(figsize=(15, 5))
+history_plot["england_wales_demand"].plot(
+    style="-", ax=ax, title="England Wales Demand", label="one-step forecast"
+)
+plt.legend()
+plt.savefig("./historical_forecasts.png")
+dataset_api = project.get_dataset_api()    
+dataset_api.upload("./historical_forecasts.png", "Resources/images", overwrite=True)
