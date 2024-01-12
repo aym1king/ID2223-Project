@@ -65,16 +65,21 @@ print("wjaiosioaj", history_df.head())
 print("aepic", monitor_df.head())
 # Add our prediction to the history, as the history_df won't have it - 
 # the insertion was done asynchronously, so it will take ~1 min to land on App
-print(history_df.dtypes)
-history_df.set_index('settlement_date', inplace=True)
-history_df.tz_localize(None)
-history_df.index = history_df.index.dt.days
-history_df.index = history_df.index.astype("datetime64[ns]")
-history_df.reset_index(inplace=True)
+
+# Remove time zone information from settlement_date
+history_df['settlement_date'] = history_df['settlement_date'].dt.tz_localize(None)
+
+# Convert settlement_date to date only
+history_df['settlement_date'] = history_df['settlement_date'].dt.date
+
+# Concatenate history_df and monitor_df
+history_df = pd.concat([history_df, monitor_df])
+
+# Sort DataFrame by settlement_date
+history_df.sort_values(by='settlement_date', inplace=True)
+
 print(history_df.head())
 print(history_df.dtypes)
-history_df = pd.concat([history_df, monitor_df])
-history_df.sort_values(by=['settlement_date'])
 
 fig, ax = plt.subplots(figsize=(15, 5))
 history_df.plot(x = 'settlement_date', y = 'prediction',
