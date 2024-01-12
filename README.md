@@ -11,7 +11,7 @@ In this file, we read the dataset from the weather API by specifying the latitud
 Here the lagged features are created in a span of 7, 14, 21, and 28 days which provides added information to the feature group in Hopsworks.
 
 **Training_Pipeline**
-Before training the model further features are added (day of week, day of year, month, quarter, year) which can provide further information for the model to train on. The model was trained on XGBoost because it is an accurate time-series forecasting model, and the hyperparameters were tuned using grid search. However, the test results are high so some adjustments need to be made.
+Before training the model further features are added (day of week, day of year, month, quarter, year) which can provide beneficial information for the model to train on. The model was trained on XGBoost because it is an accurate time-series forecasting model, and the hyperparameters were tuned using grid search. However, the test results are high so some adjustments need to be made.
 
 **Inference_Pipeline**
 In the inference pipeline, we provide daily updated batch data on the predicted electricity demand based on the span between 2 days before and 1 day before. This graph is then uploaded to Huggingface.co
