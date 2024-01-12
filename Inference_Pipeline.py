@@ -20,6 +20,7 @@ all_dates.append(today)
 
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
 batch_data = feature_view.get_batch_data(start_time=all_dates[0], end_time=all_dates[-2])
+print("this is batch:", batch_data)
 
 def add_date_features(df):
     new_df = df.copy()
@@ -49,7 +50,10 @@ monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
                                             description="Electricity Demand Forecasting Monitoring"
                                             )
 
-demand = y_pred[-1]
+demand = y_pred
+print("this is y_pred", y_pred)
+dates = pd.Timestamp(dt_str) for dt_str in all_dates
+print("this is dates", dates)
 
 data = {
     'prediction': [demand],
