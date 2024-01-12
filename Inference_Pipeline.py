@@ -68,7 +68,7 @@ history_df.set_index('settlement_date')
 history_df.index = history_df.index.astype("datetime64[ns]")
 history_df = history_df.tz_localize(None)
 history_df.sort_index(inplace=True)
-history_df.reset_index()
+history_df.reset_index(inplace=True)
 
 print(type(history_df))
 print(history_df.dtypes)
@@ -76,7 +76,7 @@ print(history_df.columns)
 print(history_df)
 
 fig, ax = plt.subplots(figsize=(15, 5))
-history_df['prediction'].plot(
+history_df.plot(x = 'settlement_date', y = 'prediction',
     style=".", ax=ax, title="Daily One-Step Forecast Plot for England/Wales Demand"
 )
 plt.ylabel('Electricity Demand (MW)')
