@@ -70,7 +70,7 @@ history_df.sort_index(inplace=True)
 history_plot = history_df.rename(columns={'predictions': 'predicted_england_wales_demand'})
 
 fig, ax = plt.subplots(figsize=(15, 5))
-history_plot["england_wales_demand"].plot(
+history_plot["predicted_england_wales_demand"].plot(
     style=".", ax=ax, title="England Wales Demand", label="one-step forecast"
 )
 plt.legend()
