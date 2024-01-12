@@ -65,14 +65,14 @@ print("wjaiosioaj", history_df.head())
 print("aepic", monitor_df.head())
 # Add our prediction to the history, as the history_df won't have it - 
 # the insertion was done asynchronously, so it will take ~1 min to land on App
-history_df['settlement_date'] = history_df['settlement_date'].astype("datetime64[ns]").dt.date
+print(history_df.dtypes)
+history_df['settlement_date'] = history_df['settlement_date'].astype("datetime64[ns]")
+history_df['settlement_date'] = history_df['settlement_date'].dt.days
+history_df['settlement_date'] = history_df['settlement_date'].astype("datetime64[ns]")
+print(history_df.head())
+print(history_df.dtypes)
 history_df = pd.concat([history_df, monitor_df])
 history_df.sort_values(by=['settlement_date'])
-
-print(type(history_df))
-print(history_df.dtypes)
-print(history_df.columns)
-print(history_df)
 
 fig, ax = plt.subplots(figsize=(15, 5))
 history_df.plot(x = 'settlement_date', y = 'prediction',
