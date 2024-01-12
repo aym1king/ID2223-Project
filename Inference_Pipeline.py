@@ -52,7 +52,7 @@ monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
 
 demand = y_pred
 print("this is y_pred", y_pred)
-dates = [pd.Timestamp(dt_str) for dt_str in all_dates[:-1]]
+dates = [pd.Timestamp(dt_str) for dt_str in all_dates[:-1]] 
 print("this is dates", dates)
 
 data = {
@@ -61,6 +61,7 @@ data = {
    }
 
 monitor_df = pd.DataFrame(data)
+monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64[ns]")
 monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
 history_df = monitor_fg.read()
