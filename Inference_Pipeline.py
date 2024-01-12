@@ -67,10 +67,15 @@ history_df = pd.concat([history_df, monitor_df])
 history_df.set_index('settlement_date')
 history_df.sort_index(inplace=True)
 
+print(type(history_df))
+print(history_df.dtypes)
+print(history_df.columns)
+print(history_df)
+
 history_plot = history_df.rename(columns={'predictions': 'predicted_england_wales_demand'})
 
 fig, ax = plt.subplots(figsize=(15, 5))
-history_plot["predicted_england_wales_demand"].plot(
+history_plot.plot(
     style=".", ax=ax, title="England Wales Demand", label="one-step forecast"
 )
 plt.legend()
