@@ -57,14 +57,14 @@ data = {
    }
 
 monitor_df = pd.DataFrame(data)
-monitor_df['settlement_date'] = monitor_df['settlement_date'].tz_convert(None).astype("datetime64[ns]")
+monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64[ns]")
 monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
 history_df = monitor_fg.read()
 # Add our prediction to the history, as the history_df won't have it - 
 # the insertion was done asynchronously, so it will take ~1 min to land on App
 history_df = pd.concat([history_df, monitor_df])
-history_df['settlement_date'] = history_df['settlement_date'].astype("datetime64[ns]")
+history_df['settlement_date'] = history_df['settlement_date'].tz_convert(None).astype("datetime64[ns]")
 history_df.set_index('settlement_date')
 history_df.sort_index(inplace=True)
 
