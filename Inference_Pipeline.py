@@ -57,7 +57,7 @@ print("this is dates", dates)
 
 data = {
     'prediction': [demand],
-    'settlement_date': [pd.Timestamp(dt_str) for dt_str in all_dates]
+    'settlement_date': [dates]
    }
 
 monitor_df = pd.DataFrame(data)
