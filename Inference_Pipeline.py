@@ -11,10 +11,11 @@ import datetime
 from datetime import date, timedelta
 today = datetime.datetime.now()
 yesterday = (today - timedelta(1)).strftime('%Y-%m-%d')
+yesterday_2 = (today - timedelta(2)).strftime('%Y-%m-%d')
 today = today.strftime('%Y-%m-%d')
 
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
-batch_data = feature_view.get_batch_data(start_time=yesterday, end_time=today)
+batch_data = feature_view.get_batch_data(start_time=yesterday_2, end_time=yesterday)
 print("this is batch:", batch_data)
 
 def add_date_features(df):
