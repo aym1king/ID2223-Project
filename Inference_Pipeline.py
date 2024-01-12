@@ -63,7 +63,7 @@ data = {
 
 monitor_df = pd.DataFrame(data)
 monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64[ns]")
-monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
+monitor_fg.insert(monitor_df, write_options={"wait_for_job" : True})
 
 history_df = monitor_fg.read()
 # Add our prediction to the history, as the history_df won't have it - 
