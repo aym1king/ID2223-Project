@@ -46,7 +46,7 @@ monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
                                             description="Electricity Demand Forecasting Monitoring"
                                             )
 
-demand = [y_pred]
+demand = y_pred
 print("this is y_pred", y_pred)
 dates = [pd.Timestamp(yesterday)]
 print("this is dates", dates)
