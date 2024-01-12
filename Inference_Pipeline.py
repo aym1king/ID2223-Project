@@ -52,7 +52,7 @@ monitor_fg = fs.get_or_create_feature_group(name="demand_predictions",
 
 demand = y_pred
 print("this is y_pred", y_pred)
-dates = pd.Timestamp(dt_str) for dt_str in all_dates
+dates = [pd.Timestamp(dt_str) for dt_str in all_dates]
 print("this is dates", dates)
 
 data = {
