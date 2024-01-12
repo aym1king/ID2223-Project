@@ -10,7 +10,7 @@ fs = project.get_feature_store()
 import datetime
 from datetime import date, timedelta
 today = datetime.datetime.now()
-n = 3
+n = 1
 all_dates = []
 for k in range(n, 0, -1):
     date_n_days_ago = (today - timedelta(k)).strftime('%Y-%m-%d')
@@ -19,7 +19,7 @@ today = today.strftime('%Y-%m-%d')
 all_dates.append(today)
 print("all dates:", all_dates)
 feature_view = fs.get_feature_view(name="lag_demand_and_weather", version=1)
-batch_data = feature_view.get_batch_data()#start_time=all_dates[0], end_time=all_dates[-1])
+batch_data = feature_view.get_batch_data(start_time=all_dates[0], end_time=all_dates[-1])
 print("this is batch:", batch_data)
 
 def add_date_features(df):
@@ -63,7 +63,7 @@ data = {
 
 monitor_df = pd.DataFrame(data)
 monitor_df['settlement_date'] = monitor_df['settlement_date'].astype("datetime64[ns]")
-monitor_fg.insert(monitor_df, write_options={"wait_for_job" : True})
+monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
 history_df = monitor_fg.read()
 # Add our prediction to the history, as the history_df won't have it - 
