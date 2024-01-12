@@ -1,7 +1,5 @@
 import hopsworks
 import joblib
-from PIL import Image
-import dataframe_image as dfi
 import matplotlib.pyplot as plt
 import pandas as pd
 import requests
@@ -68,7 +66,7 @@ history_plot = history_df.set_axis(['england_wales_demand'], axis=1)
 
 fig, ax = plt.subplots(figsize=(15, 5))
 history_plot["england_wales_demand"].plot(
-    style="-", ax=ax, title="England Wales Demand", label="one-step forecast"
+    style=".", ax=ax, title="England Wales Demand", label="one-step forecast"
 )
 plt.legend()
 plt.savefig("./historical_forecasts.png")
